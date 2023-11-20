@@ -42,7 +42,18 @@ final class CourierFactory extends ModelFactory
      */
     protected function getDefaults(): array
     {
+        if (rand() % 100 > 50 ) {
+            return [
+                'courierOwner' => CourierOwnerFactory::createOne([
+                    'service' => ServiceFactory::random()
+                ])
+            ];
+        }
+
         return [
+            'courierOwner' => CourierOwnerFactory::createOne([
+                'owner' => UserFactory::random()
+            ])
         ];
     }
 

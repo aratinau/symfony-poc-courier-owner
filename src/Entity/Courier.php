@@ -7,6 +7,7 @@ use App\Repository\CourierRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JetBrains\PhpStorm\Deprecated;
 
 #[ORM\Entity(repositoryClass: CourierRepository::class)]
 #[ApiResource]
@@ -17,16 +18,16 @@ class Courier
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Deprecated]
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'couriers')]
     private Collection $users;
 
-    #[ORM\ManyToMany(targetEntity: CourierOwner::class)]
-    private Collection $courierOwners;
+    #[ORM\OneToOne(mappedBy: 'courier', cascade: ['persist', 'remove'])]
+    private ?CourierOwner $courierOwner = null;
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
-        $this->courierOwners = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -58,26 +59,19 @@ class Courier
         return $this;
     }
 
-    /**
-     * @return Collection<int, CourierOwner>
-     */
-    public function getCourierOwners(): Collection
+    public function getCourierOwner(): ?CourierOwner
     {
-        return $this->courierOwners;
+        return $this->courierOwner;
     }
 
-    public function addCourierOwner(CourierOwner $courierOwner): static
+    public function setCourierOwner(CourierOwner $courierOwner): static
     {
-        if (!$this->courierOwners->contains($courierOwner)) {
-            $this->courierOwners->add($courierOwner);
+        // set the owning side of the relation if necessary
+        if ($courierOwner->getCourier() !== $this) {
+            $courierOwner->setCourier($this);
         }
 
-        return $this;
-    }
-
-    public function removeCourierOwner(CourierOwner $courierOwner): static
-    {
-        $this->courierOwners->removeElement($courierOwner);
+        $this->courierOwner = $courierOwner;
 
         return $this;
     }

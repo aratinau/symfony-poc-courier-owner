@@ -21,6 +21,10 @@ class CourierOwner
     #[ORM\ManyToOne]
     private ?Service $service = null;
 
+    #[ORM\OneToOne(inversedBy: 'courierOwner', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Courier $courier = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -46,6 +50,18 @@ class CourierOwner
     public function setService(?Service $service): static
     {
         $this->service = $service;
+
+        return $this;
+    }
+
+    public function getCourier(): ?Courier
+    {
+        return $this->courier;
+    }
+
+    public function setCourier(Courier $courier): static
+    {
+        $this->courier = $courier;
 
         return $this;
     }
