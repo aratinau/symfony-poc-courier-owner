@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -30,6 +32,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255)]
     private ?string $firstname = null;
+
+    #[ORM\ManyToMany(targetEntity: Courier::class, mappedBy: 'users')]
+    private Collection $couriers;
+
+    public function __construct()
+    {
+        $this->couriers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -109,6 +119,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFirstname(string $firstname): static
     {
         $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Courier>
+     */
+    public function getCouriers(): Collection
+    {
+        return $this->couriers;
+    }
+
+    public function addCourier(Courier $courier): static
+    {
+        if (!$this->couriers->contains($courier)) {
+            $this->couriers->add($courier);
+            $courier->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCourier(Courier $courier): static
+    {
+        if ($this->couriers->removeElement($courier)) {
+            $courier->removeUser($this);
+        }
 
         return $this;
     }
